@@ -1,15 +1,17 @@
 'use client';
 import React from 'react';
-import { Github, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-const Auth = () => {
-  const router = useRouter()
+import { Github } from 'lucide-react';
+import { signIn } from 'next-auth/react';
 
-  const handleOAuth = (provider: string) => {
+const Auth = () => {
+  const router = useRouter();
+
+  const handleOAuth = () => {
     // Placeholder for OAuth logic
-    console.log(`${provider} OAuth clicked`);
-    router.push('/')
+    signIn('github');
+    router.push('/');
   };
 
   return (
@@ -28,15 +30,9 @@ const Auth = () => {
           <div className='my-10 flex items-center justify-around'>
             <button
               className='flex items-center border px-10 py-5 rounded-full bg-black text-white'
-              onClick={() => handleOAuth('github')}
+              onClick={handleOAuth}
             >
               <Github className='mr-2 h-4 w-4' /> GitHub
-            </button>
-            <button
-              className='flex items-center border px-10 py-5 rounded-full bg-red-600 text-white'
-              onClick={() => handleOAuth('google')}
-            >
-              <Mail className='mr-2 h-4 w-4' /> Google
             </button>
           </div>
         </section>
