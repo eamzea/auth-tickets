@@ -2,10 +2,10 @@ import { withAuth } from "next-auth/middleware";
 
 export default withAuth({
   pages: {
-    signIn: "/signin",
+    signIn: "/auth",
   },
 });
 
 export const config = {
-  matcher: ["/"], // Protects the home route
+  matcher: ["/"],
 };
