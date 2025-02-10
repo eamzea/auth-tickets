@@ -1,5 +1,5 @@
 export interface TaskIT {
-  id: number;
+  id: string;
   title: string;
   completed: boolean;
   details: string;
