@@ -1,24 +1,27 @@
 'use server';
-import { ENV } from '@/constants/tasks';
 import { TaskIT } from '@/types/task';
 import { revalidatePath } from 'next/cache';
 
 export const getTasks = async (): Promise<TaskIT[]> => {
-  const req = await fetch(`${ENV}/api/tasks`);
-  const { tasks } = await req.json();
+  try {
+    const req = await fetch(`${process.env.HOST}/api/tasks`);
+    const { tasks } = await req.json();
 
-  return tasks;
+    return tasks;
+  } catch {
+    return [];
+  }
 };
 
 export const getTask = async (id: string): Promise<TaskIT> => {
-  const req = await fetch(`${ENV}/api/tasks/${id}`);
+  const req = await fetch(`${process.env.HOST}/api/tasks/${id}`);
   const { task } = await req.json();
 
   return task as TaskIT;
 };
 
 export const newTask = async ({ title, details }: Record<string, string>) => {
-  await fetch(`${ENV}/api/tasks`, {
+  await fetch(`${process.env.HOST}/api/tasks`, {
     method: 'POST',
     body: JSON.stringify({ title, details }),
   });
@@ -29,7 +32,7 @@ export const newTask = async ({ title, details }: Record<string, string>) => {
 };
 
 export const removeTask = async (id: string) => {
-  await fetch(`${ENV}/api/tasks`, {
+  await fetch(`${process.env.HOST}/api/tasks`, {
     method: 'DELETE',
     body: JSON.stringify(id),
   });
@@ -47,7 +50,7 @@ export const updateTask = async ({
   details,
   completed,
 }: Record<string, string | boolean>) => {
-  await fetch(`${ENV}/api/tasks/${id}`, {
+  await fetch(`${process.env.HOST}/api/tasks/${id}`, {
     method: 'PUT',
     body: JSON.stringify({ title, details, completed }),
   });

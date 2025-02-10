@@ -4,10 +4,11 @@ import { CirclePlus } from 'lucide-react';
 import { getTasks } from '@/utils/fetcher';
 import TaskList from '@/components/TaskList';
 import { getServerSession } from 'next-auth';
-import { authOptions } from './api/auth/[...nextauth]/route';
 import { redirect } from 'next/navigation';
+import { authOptions } from '@/utils/auth';
 
 const Home = async () => {
+  console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
   const tasks = await getTasks();
   const session = await getServerSession(authOptions);
 
