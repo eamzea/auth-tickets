@@ -1,23 +1,26 @@
 'use client';
 import React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { redirect, useRouter, useSearchParams } from 'next/navigation';
 
 import { Github, User } from 'lucide-react';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 
 const Auth = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const { status } = useSession()
+
+  if (status === "authenticated") {
+    redirect('/')
+  }
 
   const handleOAuth = async (provider: string) => {
-    // Placeholder for OAuth logic
-    const result = await signIn(provider, {
+    await signIn(provider, {
       callbackUrl: provider === 'github' ? callbackUrl : '/',
     });
 
-    console.log({ result });
-    router.push('/');
+    router.replace('/');
   };
 
   return (
