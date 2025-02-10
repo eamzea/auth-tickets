@@ -1,17 +1,10 @@
-'use client';
-import { useState } from 'react';
 import Link from 'next/link';
 
 import { CirclePlus, Trash2 } from 'lucide-react';
+import { getTasks } from '@/utils/fetcher';
 
-import { TaskIT } from '@/types/task';
-
-const Home = () => {
-  const [tasks, setTasks] = useState<TaskIT[]>([
-    { id: 1, title: 'Learn React', completed: false, details: '' },
-    { id: 2, title: 'Build a task list app', completed: false, details: '' },
-    { id: 3, title: 'Deploy to production', completed: false, details: '' },
-  ]);
+const Home = async () => {
+  const tasks = await getTasks();
 
   return (
     <main className='container mx-auto min-h-screen py-10'>
