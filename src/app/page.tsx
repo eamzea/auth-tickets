@@ -1,19 +1,16 @@
 'use client';
-import { CirclePlus, Trash2 } from 'lucide-react';
-import Link from 'next/link';
 import { useState } from 'react';
+import Link from 'next/link';
 
-interface Task {
-  id: number;
-  title: string;
-  completed: boolean;
-}
+import { CirclePlus, Trash2 } from 'lucide-react';
+
+import { TaskIT } from '@/types/task';
 
 const Home = () => {
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: 1, title: 'Learn React', completed: false },
-    { id: 2, title: 'Build a task list app', completed: false },
-    { id: 3, title: 'Deploy to production', completed: false },
+  const [tasks, setTasks] = useState<TaskIT[]>([
+    { id: 1, title: 'Learn React', completed: false, details: '' },
+    { id: 2, title: 'Build a task list app', completed: false, details: '' },
+    { id: 3, title: 'Deploy to production', completed: false, details: '' },
   ]);
 
   return (
@@ -32,9 +29,7 @@ const Home = () => {
               key={task.id}
               className='flex items-center justify-between p-3 bg-gray-50 rounded-md'
             >
-              <Link
-                href={`/task/${task.id}`}
-              >
+              <Link href={`/task/${task.id}`}>
                 <div className='flex items-center space-x-3'>
                   <p
                     className={`text-sm font-medium leading-none hover:cursor-pointer ${
