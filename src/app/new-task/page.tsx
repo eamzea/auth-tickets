@@ -1,12 +1,15 @@
 'use client';
 import React, { Dispatch, useState } from 'react';
 
+import { newTask } from '@/utils/fetcher';
+import { useRouter } from 'next/navigation';
+
 const NewTask = () => {
   const [task, setTask] = useState({
     title: '',
     details: '',
-    completed: false,
   });
+  const router = useRouter();
 
   const handleChange =
     (setter: Dispatch<React.SetStateAction<typeof task>>, target: string) =>
@@ -15,11 +18,13 @@ const NewTask = () => {
         ...task,
         [target]: event.target.value,
       });
-      };
+    };
 
-  const handleCreateTask = () => {
+  const handleCreateTask = async () => {
+    await newTask({ title: task.title, details: task.details });
 
-  }
+    router.push('/');
+  };
 
   return (
     <section className='container mx-auto min-h-screen py-10'>
@@ -67,7 +72,11 @@ const NewTask = () => {
                 required
               />
             </div>
-            <button className='flex items-center border px-10 py-5 rounded-full bg-black text-white disabled:opacity-75' onClick={handleCreateTask} disabled={!task.title || !task.details}>
+            <button
+              className='flex items-center border px-10 py-5 rounded-full bg-black text-white disabled:opacity-75'
+              onClick={handleCreateTask}
+              disabled={!task.title || !task.details}
+            >
               Create Task
             </button>
           </div>
