@@ -1,5 +1,5 @@
 import GitHubProvider from 'next-auth/providers/github';
-import CredentialsProvider from "next-auth/providers/credentials";
+import CredentialsProvider from 'next-auth/providers/credentials';
 
 export const authOptions = {
   providers: [
@@ -11,19 +11,19 @@ export const authOptions = {
 
     // ✅ Credentials Provider (Mocked Authentication)
     CredentialsProvider({
-      name: "Credentials",
+      name: 'Credentials',
       credentials: {
-        username: { label: "Username", type: "username", placeholder: "admin" },
-        password: { label: "Password", type: "password", placeholder: "admin" },
+        username: { label: 'Username', type: 'username', placeholder: 'admin' },
+        password: { label: 'Password', type: 'password', placeholder: 'admin' },
       },
-      async authorize(credentials) {
+      async authorize() {
         const user = {
           username: 'admin',
-          password: 'admin'
-        }
+          password: 'admin',
+        };
 
         if (!user) {
-          throw new Error("Invalid email or password");
+          throw new Error('Invalid email or password');
         }
 
         return { id: '1', name: 'Edgar', email: 'admin@example.com' };
@@ -31,11 +31,11 @@ export const authOptions = {
     }),
   ],
   pages: {
-    signIn: "/auth",
+    signIn: '/auth',
   },
   callbacks: {
-    async redirect({ url, baseUrl }) {
-      return url.startsWith(baseUrl) ? url : "/";
+    async redirect({ url, baseUrl }: Record<string, string>) {
+      return url.startsWith(baseUrl) ? url : '/';
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
