@@ -4,14 +4,14 @@ import crypto from 'crypto';
 import { TaskIT } from '@/types/task';
 
 export async function GET() {
-  const file = await fs.readFile(process.cwd() + '/data/tasks.json', 'utf8');
-  const { tasks } = JSON.parse(file);
   const folder = await fs.readdir(process.cwd())
-
   console.log({
     dir: process.cwd(),
     folder
   })
+  const file = await fs.readFile(process.cwd() + '/data/tasks.json', 'utf8');
+  const { tasks } = JSON.parse(file);
+
 
   return NextResponse.json({
     tasks,
