@@ -10,8 +10,8 @@ import { authOptions } from '@/utils/auth';
 import LogOut from '@/components/LogOut';
 
 const Home = async () => {
-  const tasks = await getTasks();
   const session = await getServerSession(authOptions);
+  const tasks = await getTasks();
 
   if (!session) {
     redirect('/auth'); // Redirect if not authenticated
@@ -21,7 +21,7 @@ const Home = async () => {
     <main className='container mx-auto min-h-screen py-10'>
       <div className='flex items-center justify-around'>
         <p>Hello {session.user?.name}</p>
-      <LogOut />
+        <LogOut />
       </div>
       <section className='max-w-xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg'>
         <div className='flex items-center justify-between mb-6'>

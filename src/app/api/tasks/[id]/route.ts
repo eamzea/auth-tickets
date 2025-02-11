@@ -1,39 +1,71 @@
-import { promises as fs } from 'fs';
-import { NextResponse } from 'next/server';
-import { TaskIT } from '@/types/task';
-import path from 'path';
+import { NextRequest, NextResponse } from 'next/server';
+import { validateUser } from '@/utils/validateUser';
+import { PrismaClient } from '@prisma/client';
 
-const folder = path.join(process.cwd(), '/public/tasks.json');
+const prisma = new PrismaClient();
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const id = (await params).id;
-  const file = await fs.readFile(folder, 'utf8');
-  const { tasks } = JSON.parse(file);
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const taskId = (await params).id;
+  const id = req.headers.get('id');
 
-  const task = tasks.filter((task: TaskIT) => task.id === id)[0];
+  const result = await validateUser(id);
+
+  if (!result.ok) {
+    return NextResponse.json({
+      ok: false,
+      ...result.response,
+    });
+  }
 
   return NextResponse.json({
-    task,
+    task: result.user.tasks.filter(task => task.id === taskId)[0],
   });
 }
 
-export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const userId = req.headers.get('id');
+
+  const result = await validateUser(userId);
+
+  if (!result.ok) {
+    return NextResponse.json({
+      ok: false,
+      ...result.response,
+    });
+  }
   const id = (await params).id;
-  const {title, details, completed} = await request.json();
-  const file = await fs.readFile(folder, 'utf8');
-  const { tasks } = JSON.parse(file);
+  const { title, details, completed } = await req.json();
 
-  const newTasks = tasks.map((task: TaskIT) => {
-    if (task.id === id) {
-      task.title = title
-      task.details = details
-      task.completed = completed
-    }
-
-    return task
+  await prisma.task.update({
+    where: { id },
+    data: {
+      title,
+      details,
+      completed,
+    },
   });
 
-  await fs.writeFile(folder, JSON.stringify({ tasks: [...newTasks] }));
+  return NextResponse.json({
+    ok: true,
+  });
+}
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const userId = req.headers.get('id');
+
+  const result = await validateUser(userId);
+
+  if (!result.ok) {
+    return NextResponse.json({
+      ok: false,
+      ...result.response,
+    });
+  }
+  const id = (await params).id;
+
+  await prisma.task.delete({
+    where: { id },
+  });
 
   return NextResponse.json({
     ok: true,
