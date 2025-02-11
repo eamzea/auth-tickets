@@ -1,4 +1,5 @@
 'use client';
+import { store } from '@/store/loader';
 import { TaskIT } from '@/types/task';
 import { updateTask } from '@/utils/fetcher';
 import { useRouter } from 'next/navigation';
@@ -15,6 +16,7 @@ const Task: FC<TaskProps> = ({ task }) => {
     completed: false,
   });
   const router = useRouter();
+  const {setLoading} = store()
 
   useEffect(() => {
     setNewTask({
@@ -34,6 +36,7 @@ const Task: FC<TaskProps> = ({ task }) => {
     };
 
   const handleUpdateTask = async () => {
+    setLoading(true)
     await updateTask({
       id: task.id,
       title: newTask.title,
@@ -41,6 +44,7 @@ const Task: FC<TaskProps> = ({ task }) => {
       completed: newTask.completed,
     });
 
+    setLoading(false)
     router.push('/');
   };
 

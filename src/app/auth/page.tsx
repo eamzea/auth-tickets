@@ -5,11 +5,14 @@ import { useSession } from 'next-auth/react';
 
 import LogIn from '@/components/LogIn';
 import Loading from '@/components/Loading';
+import { store } from '@/store/loader';
 
 const Auth = () => {
   const { status } = useSession();
+  const { setLoading } = store();
 
   if (status === 'authenticated') {
+    setLoading(false);
     redirect('/');
   }
 

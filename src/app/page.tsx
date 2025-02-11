@@ -14,7 +14,7 @@ const Home = async () => {
   const tasks = await getTasks();
 
   if (!session) {
-    redirect('/auth'); // Redirect if not authenticated
+    redirect('/auth');
   }
 
   return (
