@@ -1,56 +1,57 @@
-import { promises as fs } from 'fs';
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
-import { TaskIT } from '@/types/task';
-import path from 'path';
+import { PrismaClient } from '@prisma/client';
+import { validateUser } from '@/utils/validateUser';
 
-const folder = path.join(process.cwd(), '/public/tasks.json');
+const prisma = new PrismaClient();
 
-export async function GET() {
-  const fold = await fs.readdir(process.cwd() + '/public/');
-  console.log({
-    dir: fold,
-    folder,
-  });
-  const file = await fs.readFile(folder, 'utf8');
-  const { tasks } = JSON.parse(file);
+export async function GET(req: NextRequest) {
+  const id = req.headers.get('id');
+
+  const result = await validateUser(id);
+
+  if (!result.ok) {
+    return NextResponse.json({
+      ok: false,
+      ...result.response,
+    });
+  }
 
   return NextResponse.json({
-    tasks,
+    tasks: result.user.tasks,
   });
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const file = await fs.readFile(folder, 'utf8');
-  const { tasks } = JSON.parse(file);
+  const id = req.headers.get('id');
 
-  const id = crypto.randomBytes(16).toString('hex');
+  try {
+    const result = await validateUser(id);
 
-  tasks.push({
-    id,
-    title: body.title,
-    details: body.details,
-    completed: false,
-  });
+    if (!result.ok) {
+      return NextResponse.json({
+        ok: false,
+        ...result.response,
+      });
+    }
 
-  await fs.writeFile(folder, JSON.stringify({ tasks: [...tasks] }));
+    const { title, details } = await req.json();
 
-  return NextResponse.json({
-    ok: true,
-  });
-}
+    await prisma.task.create({
+      data: {
+        title,
+        details,
+        completed: false,
+        userId: result.user.id,
+      },
+    });
 
-export async function DELETE(req: NextRequest) {
-  const body = await req.json();
-  const file = await fs.readFile(folder, 'utf8');
-  const { tasks } = JSON.parse(file);
-
-  const newTasks = tasks.filter((task: TaskIT) => task.id === body.id);
-
-  await fs.writeFile(folder, JSON.stringify({ tasks: [...newTasks] }));
-
-  return NextResponse.json({
-    ok: true,
-  });
+    return NextResponse.json({
+      ok: true,
+    });
+  } catch {
+    return NextResponse.json({
+      ok: false,
+      message: 'Server Error',
+    });
+  }
 }

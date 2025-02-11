@@ -1,9 +1,12 @@
 import React from 'react';
-import { getTask, getTasks } from '@/utils/fetcher';
+import { getTask } from '@/utils/fetcher';
 import Task from '@/components/Task';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export async function generateStaticParams() {
-  const tasks = await getTasks();
+  const tasks = await prisma.task.findMany()
 
   return tasks.map(task => ({
     id: task.id,

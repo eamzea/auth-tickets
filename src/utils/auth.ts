@@ -1,5 +1,17 @@
 import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { PrismaClient } from '@prisma/client';
+import { Session } from 'next-auth';
+import { DefaultSession } from 'next-auth';
+
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id: string;
+    } & DefaultSession['user'];
+  }
+}
+const prisma = new PrismaClient();
 
 export const authOptions = {
   providers: [
@@ -17,16 +29,35 @@ export const authOptions = {
         password: { label: 'Password', type: 'password', placeholder: 'admin' },
       },
       async authorize() {
-        const user = {
+        const userMock = {
           username: 'admin',
           password: 'admin',
         };
 
-        if (!user) {
+        const user = await prisma.user.findUnique({
+          where: {
+            name: userMock.username,
+            email: 'admin@example.com',
+          },
+        });
+
+        if (user) {
+          return user;
+        }
+
+        const newUser = await prisma.user.create({
+          data: {
+            name: userMock.username,
+            email: 'admin@example.com',
+            tasks: { create: [] },
+          },
+        });
+
+        if (!newUser) {
           throw new Error('Invalid email or password');
         }
 
-        return { id: '1', name: 'Edgar', email: 'admin@example.com' };
+        return newUser;
       },
     }),
   ],
@@ -36,6 +67,18 @@ export const authOptions = {
   callbacks: {
     async redirect({ url, baseUrl }: Record<string, string>) {
       return url.startsWith(baseUrl) ? url : '/';
+    },
+    async session({ session }: { session: Session }) {
+      if (session?.user && session.user.email) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: session.user.email },
+        });
+
+        if (dbUser) {
+          session.user.id = dbUser.id; // ✅ Attach user ID to session
+        }
+      }
+      return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

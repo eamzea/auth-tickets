@@ -1,10 +1,25 @@
 'use server';
-import { TaskIT } from '@/types/task';
+import { getServerSession } from 'next-auth';
 import { revalidatePath } from 'next/cache';
+import { authOptions } from './auth';
 
-export const getTasks = async (): Promise<TaskIT[]> => {
+export const getTasks = async () => {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return {
+      tasks: [],
+      ok: false,
+      message: 'User is not authenticated',
+    };
+  }
+
   try {
-    const req = await fetch(`${process.env.HOST}/api/tasks`);
+    const req = await fetch(`${process.env.HOST}/api/tasks`, {
+      headers: {
+        id: session.user.id,
+      },
+    });
     const { tasks } = await req.json();
 
     return tasks;
@@ -13,35 +28,91 @@ export const getTasks = async (): Promise<TaskIT[]> => {
   }
 };
 
-export const getTask = async (id: string): Promise<TaskIT> => {
-  const req = await fetch(`${process.env.HOST}/api/tasks/${id}`);
-  const { task } = await req.json();
+export const getTask = async (id: string) => {
+  const session = await getServerSession(authOptions);
 
-  return task as TaskIT;
+  if (!session) {
+    return {
+      ok: false,
+      message: 'User is not authenticated',
+    };
+  }
+
+  try {
+    const req = await fetch(`${process.env.HOST}/api/tasks/${id}`, {
+      headers: {
+        id: session.user.id,
+      },
+    });
+    const { task } = await req.json();
+
+    return task;
+  } catch {
+    return {
+      ok: false,
+      message: 'Invalid task ID',
+    };
+  }
 };
 
 export const newTask = async ({ title, details }: Record<string, string>) => {
-  await fetch(`${process.env.HOST}/api/tasks`, {
-    method: 'POST',
-    body: JSON.stringify({ title, details }),
-  });
+  const session = await getServerSession(authOptions);
 
-  return {
-    ok: true,
-  };
+  if (!session) {
+    return {
+      tasks: [],
+      ok: false,
+      message: 'User is not authenticated',
+    };
+  }
+
+  try {
+    await fetch(`${process.env.HOST}/api/tasks`, {
+      method: 'POST',
+      body: JSON.stringify({ title, details }),
+      headers: {
+        id: session.user.id,
+      },
+    });
+
+    return {
+      ok: true,
+    };
+  } catch {
+    return {
+      ok: false,
+      message: 'Failed to create a new task',
+    };
+  }
 };
 
 export const removeTask = async (id: string) => {
-  await fetch(`${process.env.HOST}/api/tasks`, {
-    method: 'DELETE',
-    body: JSON.stringify(id),
-  });
+  try {
+    const session = await getServerSession(authOptions);
 
-  revalidatePath('/');
+    if (!session) {
+      return {
+        tasks: [],
+        ok: false,
+        message: 'User is not authenticated',
+      };
+    }
 
-  return {
-    ok: true,
-  };
+    await fetch(`${process.env.HOST}/api/tasks/${id}`, {
+      method: 'DELETE',
+      headers: {
+        id: session.user.id,
+      },
+    });
+
+    revalidatePath('/');
+
+    return {
+      ok: true,
+    };
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const updateTask = async ({
@@ -50,9 +121,22 @@ export const updateTask = async ({
   details,
   completed,
 }: Record<string, string | boolean>) => {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return {
+      tasks: [],
+      ok: false,
+      message: 'User is not authenticated',
+    };
+  }
+
   await fetch(`${process.env.HOST}/api/tasks/${id}`, {
     method: 'PUT',
     body: JSON.stringify({ title, details, completed }),
+    headers: {
+      id: session.user.id,
+    },
   });
 
   return {

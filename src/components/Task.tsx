@@ -2,7 +2,7 @@
 import { TaskIT } from '@/types/task';
 import { updateTask } from '@/utils/fetcher';
 import { useRouter } from 'next/navigation';
-import React, { Dispatch, FC, useState } from 'react';
+import React, { Dispatch, FC, useEffect, useState } from 'react';
 
 interface TaskProps {
   task: TaskIT;
@@ -10,17 +10,25 @@ interface TaskProps {
 
 const Task: FC<TaskProps> = ({ task }) => {
   const [newTask, setNewTask] = useState({
-    title: task.title,
-    details: task.details,
-    completed: task.completed,
+    title: '',
+    details: '',
+    completed: false,
   });
   const router = useRouter();
+
+  useEffect(() => {
+    setNewTask({
+      title: task.title,
+      details: task.details,
+      completed: task.completed,
+    });
+  }, []);
 
   const handleChange =
     (setter: Dispatch<React.SetStateAction<typeof newTask>>, target: string) =>
     (event: { target: { value: string } }) => {
       setter({
-        ...task,
+        ...newTask,
         [target]: event.target.value,
       });
     };
@@ -99,7 +107,7 @@ const Task: FC<TaskProps> = ({ task }) => {
         <button
           className='flex items-center border px-10 py-5 rounded-full bg-black text-white disabled:opacity-75'
           onClick={handleUpdateTask}
-          disabled={!task.title || !task.details}
+          disabled={!newTask.title || !newTask.details}
         >
           Modify Task
         </button>

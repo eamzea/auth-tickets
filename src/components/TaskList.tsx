@@ -13,6 +13,7 @@ const TaskList: FC<TaskListProps> = ({ tasks }) => {
   const handleDelete = async (id: string) => {
     await removeTask(id);
   };
+
   return (
     <ul className='space-y-4'>
       {tasks.map(task => (
