@@ -3,6 +3,7 @@ import React, { Dispatch, useState } from 'react';
 
 import { newTask } from '@/utils/fetcher';
 import { useRouter } from 'next/navigation';
+import { store } from '@/store/loader';
 
 const NewTask = () => {
   const [task, setTask] = useState({
@@ -10,6 +11,7 @@ const NewTask = () => {
     details: '',
   });
   const router = useRouter();
+  const { setLoading } = store();
 
   const handleChange =
     (setter: Dispatch<React.SetStateAction<typeof task>>, target: string) =>
@@ -21,7 +23,9 @@ const NewTask = () => {
     };
 
   const handleCreateTask = async () => {
+    setLoading(true);
     await newTask({ title: task.title, details: task.details });
+    setLoading(false);
 
     router.push('/');
   };
