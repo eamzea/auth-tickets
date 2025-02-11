@@ -4,12 +4,12 @@ import crypto from 'crypto';
 import { TaskIT } from '@/types/task';
 
 export async function GET() {
-  const folder = await fs.readdir(process.cwd())
+  const folder = await fs.readdir(process.cwd() + '/.next/static/data/tasks.json')
   console.log({
-    dir: process.cwd(),
+    dir: process.cwd() + '/.next/static/data/tasks.json',
     folder
   })
-  const file = await fs.readFile(process.cwd() + '/app/tasks.json', 'utf8');
+  const file = await fs.readFile(process.cwd() + '/.next/static/data/tasks.json', 'utf8');
   const { tasks } = JSON.parse(file);
 
 
@@ -20,7 +20,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const file = await fs.readFile(process.cwd() + '/app/tasks.json', 'utf8');
+  const file = await fs.readFile(process.cwd() + '/.next/static/data/tasks.json', 'utf8');
   const { tasks } = JSON.parse(file);
 
   const id = crypto.randomBytes(16).toString('hex');
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     completed: false,
   });
 
-  await fs.writeFile(process.cwd() + '/app/tasks.json', JSON.stringify({ tasks: [...tasks] }));
+  await fs.writeFile(process.cwd() + '/.next/static/data/tasks.json', JSON.stringify({ tasks: [...tasks] }));
 
   return NextResponse.json({
     ok: true,
@@ -41,12 +41,12 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   const body = await req.json();
-  const file = await fs.readFile(process.cwd() + '/app/tasks.json', 'utf8');
+  const file = await fs.readFile(process.cwd() + '/.next/static/data/tasks.json', 'utf8');
   const { tasks } = JSON.parse(file);
 
   const newTasks = tasks.filter((task: TaskIT) => task.id === body.id);
 
-  await fs.writeFile(process.cwd() + '/app/tasks.json', JSON.stringify({ tasks: [...newTasks] }));
+  await fs.writeFile(process.cwd() + '/.next/static/data/tasks.json', JSON.stringify({ tasks: [...newTasks] }));
 
   return NextResponse.json({
     ok: true,
