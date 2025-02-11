@@ -1,9 +1,12 @@
 'use client';
+import { store } from '@/store/loader';
 import { signOut } from 'next-auth/react';
 import React from 'react';
 
 const LogOut = () => {
+  const { setLoading } = store();
   const handleLogout = async () => {
+    setLoading(true);
     await signOut({ redirect: true, callbackUrl: '/signin' });
   };
 

@@ -4,12 +4,16 @@ import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Github, User } from 'lucide-react';
+import { store } from '@/store/loader';
 
 const LogIn = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const { setLoading } = store();
+
   const handleOAuth = async (provider: string) => {
+    setLoading(true)
     await signIn(provider, {
       callbackUrl: provider === 'github' ? callbackUrl : '/',
     });

@@ -1,4 +1,5 @@
 'use client';
+import { store } from '@/store/loader';
 import { TaskIT } from '@/types/task';
 import { removeTask } from '@/utils/fetcher';
 import { Trash2 } from 'lucide-react';
@@ -10,7 +11,10 @@ interface TaskListProps {
 }
 
 const TaskList: FC<TaskListProps> = ({ tasks }) => {
+  const { setLoading } = store();
+
   const handleDelete = async (id: string) => {
+    setLoading(true);
     await removeTask(id);
   };
 
@@ -21,7 +25,10 @@ const TaskList: FC<TaskListProps> = ({ tasks }) => {
           key={task.id}
           className='flex items-center justify-between p-3 bg-gray-50 rounded-md'
         >
-          <Link href={`/task/${task.id}`} className='w-2/3'>
+          <Link
+            href={`/task/${task.id}`}
+            className='w-2/3'
+          >
             <div className='flex items-center space-x-3'>
               <p
                 className={`text-sm font-medium leading-none hover:cursor-pointer ${
