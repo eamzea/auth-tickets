@@ -1,7 +1,7 @@
 import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaClient } from '@prisma/client';
-import { Session } from 'next-auth';
+import { Session, User } from 'next-auth';
 import { DefaultSession } from 'next-auth';
 
 declare module 'next-auth' {
@@ -54,22 +54,22 @@ export const authOptions = {
     async redirect({ url, baseUrl }: Record<string, string>) {
       return url.startsWith(baseUrl) ? url : '/';
     },
-    async signIn({ user }: { user: { name: string; email: string } }) {
+    async signIn({ user }: { user: User }) {
       const userExists = await prisma.user.findUnique({
         where: {
-          name: user.name,
-          email: user.email,
+          name: user.name ?? '',
+          email: user.email ?? '',
         },
       });
 
       if (userExists) {
-        return userExists;
+        return true;
       }
 
       const newUser = await prisma.user.create({
         data: {
-          name: user.name,
-          email: user.email,
+          name: user.name ?? '',
+          email: user.email ?? '',
           tasks: { create: [] },
         },
       });
@@ -78,7 +78,7 @@ export const authOptions = {
         throw new Error('Invalid email or password');
       }
 
-      return newUser;
+      return true;
     },
     async session({ session }: { session: Session }) {
       if (session?.user && session.user.email) {
