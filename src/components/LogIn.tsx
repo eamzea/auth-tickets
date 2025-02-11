@@ -19,12 +19,14 @@ const LogIn = () => {
   return (
     <div className='my-10 flex items-center justify-around'>
       <button
+        data-testid="github-login"
         className='flex items-center border px-10 py-5 rounded-full bg-black text-white'
         onClick={() => handleOAuth('github')}
       >
         <Github className='mr-2 h-4 w-4' /> GitHub
       </button>
       <button
+        data-testid="custom-login"
         className='flex items-center border px-10 py-5 rounded-full bg-black text-white'
         onClick={() => handleOAuth('credentials')}
       >
