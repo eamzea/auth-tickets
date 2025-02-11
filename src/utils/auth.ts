@@ -26,12 +26,10 @@ export const authOptions = {
       name: 'Credentials',
       credentials: {
         username: { label: 'Username', type: 'username', placeholder: 'admin' },
-        password: { label: 'Password', type: 'password', placeholder: 'admin' },
       },
       async authorize() {
         const userMock = {
           username: 'admin',
-          password: 'admin',
         };
 
         const user = await prisma.user.findUnique({
@@ -41,23 +39,11 @@ export const authOptions = {
           },
         });
 
-        if (user) {
-          return user;
-        }
-
-        const newUser = await prisma.user.create({
-          data: {
-            name: userMock.username,
-            email: 'admin@example.com',
-            tasks: { create: [] },
-          },
-        });
-
-        if (!newUser) {
+        if (!user) {
           throw new Error('Invalid email or password');
         }
 
-        return newUser;
+        return user;
       },
     }),
   ],
@@ -67,6 +53,32 @@ export const authOptions = {
   callbacks: {
     async redirect({ url, baseUrl }: Record<string, string>) {
       return url.startsWith(baseUrl) ? url : '/';
+    },
+    async signIn({ user }: { user: { name: string; email: string } }) {
+      const userExists = await prisma.user.findUnique({
+        where: {
+          name: user.name,
+          email: user.email,
+        },
+      });
+
+      if (userExists) {
+        return userExists;
+      }
+
+      const newUser = await prisma.user.create({
+        data: {
+          name: user.name,
+          email: user.email,
+          tasks: { create: [] },
+        },
+      });
+
+      if (!newUser) {
+        throw new Error('Invalid email or password');
+      }
+
+      return newUser;
     },
     async session({ session }: { session: Session }) {
       if (session?.user && session.user.email) {
